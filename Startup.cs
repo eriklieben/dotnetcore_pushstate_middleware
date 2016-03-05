@@ -38,7 +38,14 @@ namespace AspNetCorePushState
             
             app.UseIISPlatformHandler();
             app.UseDefaultFiles();
-            app.UseStaticFilesPushState();
+            app.UseStaticFilesPushState(new StaticFileOptions {
+                    OnPrepareResponse = (context) =>
+                    {
+                        context.Context.Response.Headers["Cache-Control"] = "no-cache, no-store";
+                        context.Context.Response.Headers["Pragma"] = "no-cache";
+                        context.Context.Response.Headers["Expires"] = "-1";
+                    }
+            });
         }
 
         // Entry point for the application.
@@ -56,6 +63,7 @@ namespace AspNetCorePushState
         IHostingEnvironment hostingEnv, StaticFileOptions options, ILoggerFactory loggerFactory) 
         {
             this.logger = loggerFactory.CreateLogger("PushState");
+                       
             
             this.next = next;
             this.middleware = new StaticFileMiddleware(next, hostingEnv, options, loggerFactory);
